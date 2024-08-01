@@ -1,10 +1,23 @@
 import Task from "../Task/Task";
 import React from "react";
 import './TaskList.css'
-const TaskList = ({ todos }) => {
-    const elements = todos.map((todo) => {
+import formatDistanceToNow from "date-fns/formatDistanceToNow";
+
+const TaskList = ({tasks, onDeleted, onToggleCompleted, editTask, onEdited}) => {
+    const elements = tasks.map((task) => {
+        const {id, ...taskProps} = task
         return (
-            <li key={todo.id} className={todo.className}><Task label={todo.label} createDate={todo.createDate} category = {todo.className}/></li>
+            <Task {...taskProps} id={id} key={id}
+                  editTask={() => {
+                      editTask(id)
+                  }}
+                  onEdited={onEdited}
+                  onDeleted={() => {
+                      onDeleted(id)
+                  }}
+                  onToggleCompleted={() => {
+                      onToggleCompleted(id)
+                  }}/>
         )
     })
     return (

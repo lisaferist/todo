@@ -1,10 +1,14 @@
-import React from "react";
+import React, {Component} from "react";
 import './TasksFilter.css'
-const TasksFilter = (props) => {
-    return (
-        <li>
-            <button className={props.className}>{props.label}</button>
-        </li>
-    )
+
+export default class TasksFilter extends Component {
+    render() {
+        const onFilterButton = (e) => {
+            this.props.onFilterButton(e);
+            this.props.filteredFunctions();
+        }
+        return (
+            <button onClick={onFilterButton} className={this.props.className}>{this.props.label}</button>
+        )
+    }
 }
-export default TasksFilter;

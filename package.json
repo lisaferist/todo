@@ -19,7 +19,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint \"src/**/*.{js,jsx}\"",
-    "lint:fix": "eslint \"src/**/*.{js,jsx}\" --fix",
+    "lint:fix": "eslint \"src/**/*.{js,jsx}\" --fix --color",
     "format": "prettier ./src --write"
   },
   "eslintConfig": {
@@ -51,6 +51,20 @@
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
+    "husky": "^9.1.4",
+    "lint-staged": "^15.2.8",
     "prettier": "3.3.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js, *.jsx" : [
+      "npm run lint:fix",
+      "npm run format",
+      "git add"
+    ]
   }
 }

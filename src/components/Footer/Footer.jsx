@@ -1,35 +1,42 @@
-import TasksFilter from "../TasksFilter";
-import React from "react";
-import "./Footer.css";
+import React from 'react'
 
-const Footer = (props) => {
-    const {allFiltered, activeFiltered, completedFiltered, onFilterButton} = props.filteredFunctions
-    const activeCount = props.activeCount;
-    const labels = Object.keys(props.filters)
-    const classNames = Object.values(props.filters)
-    const elements = labels.map((label, i) => {
-        let onFilteredFunc
-        switch (label) {
-            case 'All' :
-                onFilteredFunc = allFiltered;
-                break
-            case 'Active' :
-                onFilteredFunc = activeFiltered;
-                break
-            case 'Completed':
-                onFilteredFunc = completedFiltered;
-        }
-        return <li key={i}><TasksFilter label={label} className={classNames[i]} filteredFunctions={onFilteredFunc} onFilterButton={onFilterButton}/>
-        </li>
-    })
+import TasksFilter from '../TasksFilter'
+import './Footer.css'
+
+function Footer(props) {
+  const { filteredFunctions, activeCount, filters, clearCompleted } = props
+  const { allFiltered, activeFiltered, completedFiltered, onFilterButton } = filteredFunctions
+  const labels = Object.keys(filters)
+  const classNames = Object.values(filters)
+  const elements = labels.map((label, i) => {
+    let onFilteredFunc
+    if (label === 'All') {
+      onFilteredFunc = allFiltered
+    } else if (label === 'Active') {
+      onFilteredFunc = activeFiltered
+    } else if (label === 'Completed') {
+      onFilteredFunc = completedFiltered
+    }
     return (
-        <footer className="footer">
-            <span className="todo-count">{activeCount} items left</span>
-            <ul className="filters">
-                {elements}
-            </ul>
-            <button className="clear-completed" onClick={props.clearCompleted}>Clear completed</button>
-        </footer>
+      <li key={label}>
+        <TasksFilter
+          label={label}
+          className={classNames[i]}
+          filteredFunctions={onFilteredFunc}
+          onFilterButton={onFilterButton}
+        />
+      </li>
     )
+  })
+  return (
+    <footer className="footer">
+      <span className="todo-count">{activeCount} items left</span>
+      <ul className="filters">{elements}</ul>
+      <button type="button" className="clear-completed" onClick={clearCompleted}>
+        Clear completed
+      </button>
+    </footer>
+  )
 }
-export default Footer;
+
+export default Footer

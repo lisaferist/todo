@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import './Task.css'
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow'
 
+import Timer from '../Timer'
+
 export default class Task extends Component {
   state = {
     // eslint-disable-next-line react/destructuring-assignment
@@ -46,6 +48,7 @@ export default class Task extends Component {
           />
           <label onClick={onToggleCompleted}>
             <span className="description">{label}</span>
+            <Timer />
             <span className="created">
               created{' '}
               {formatDistanceToNow(createDate, {

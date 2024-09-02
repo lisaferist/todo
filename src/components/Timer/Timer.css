@@ -1,0 +1,28 @@
+.todo-list li label .description {
+    font-size: 13px;
+    color: gray;
+}
+.todo-list li .icon-pause,
+.todo-list li .icon-play {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+.todo-list li .icon-pause{
+    margin-right: 7px;
+}
+.todo-list li .icon-pause {
+    width: 16px;
+    height: 16px;
+}
+.todo-list li .icon-play {
+    font-size: 15px;
+}
+
+.icon-pause:after {
+    content: '⏸';
+}
+
+.icon-play:after {
+    content: '▶';
+}

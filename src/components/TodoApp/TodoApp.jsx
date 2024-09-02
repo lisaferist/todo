@@ -25,9 +25,9 @@ export default class TodoApp extends Component {
 
   state = {
     todoData: [
-      this.createTask('Active task'),
-      this.createTask('Completed task', 'completed'),
-      this.createTask('Editing task', 'editing'),
+      this.createTask('Active'),
+      this.createTask('Completed', 12, 25, 'completed'),
+      this.createTask('Editing', 14, 12, 'editing'),
     ],
     filtersData: {
       All: 'selected',
@@ -103,11 +103,36 @@ export default class TodoApp extends Component {
     }))
   }
 
-  addTask = (e) => {
-    if (e.target.value && e.code === 'Enter') {
-      const newTask = this.createTask(e.target.value)
-      e.target.value = ''
-      this.setState(({ todoData }) => ({ todoData: [...todoData, newTask] }))
+  submitTaskForm = (e) => {
+    e.preventDefault()
+    const todoText = e.target[0].value
+    if (todoText.length !== 0) {
+      const minInput = e.target[1]
+      const secInput = e.target[2]
+      const min = minInput.value
+      const sec = secInput.value
+      const isMinCorrect = Number.isInteger(Number(min)) && min >= 0
+      const isSecCorrect = Number.isInteger(Number(sec)) && sec < 60 && sec >= 0
+      if (isMinCorrect || isSecCorrect) {
+        if (isMinCorrect && minInput.className.includes('input-error')) {
+          minInput.className = minInput.className.slice(0, -12)
+        }
+        if (isSecCorrect && secInput.className.includes('input-error')) {
+          secInput.className = secInput.className.slice(0, -12)
+        }
+      }
+      if (isMinCorrect && isSecCorrect) {
+        e.target[0].value = ''
+        minInput.value = ''
+        secInput.value = ''
+        this.setState(({ todoData }) => ({ todoData: [...todoData, this.createTask(todoText, min, sec)] }))
+      }
+      if (!isMinCorrect) {
+        minInput.className += ' input-error'
+      }
+      if (!isSecCorrect) {
+        secInput.className += ' input-error'
+      }
     }
   }
 
@@ -160,12 +185,16 @@ export default class TodoApp extends Component {
     }))
   }
 
-  createTask(label, className = 'active') {
+  createTask(label, min = 0, sec = 0, className = 'active') {
     return {
       label,
       className,
       createDate: Date.now(),
       id: this.maxId++,
+      timerTime: {
+        minutes: min.length === 0 ? 0 : min,
+        seconds: sec.length === 0 ? 0 : sec,
+      },
     }
   }
 
@@ -176,7 +205,7 @@ export default class TodoApp extends Component {
       <section className="todoapp">
         <header className="header">
           <h1>todos</h1>
-          <NewTaskForm onAddTask={this.addTask} />
+          <NewTaskForm submitTaskForm={this.submitTaskForm} />
         </header>
         <section className="main">
           <TaskList

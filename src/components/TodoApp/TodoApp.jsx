@@ -1,12 +1,25 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 
 import NewTaskForm from '../NewTaskForm'
 import TaskList from '../TaskList'
 import Footer from '../Footer'
 import './TodoApp.css'
 
-export default class TodoApp extends Component {
-  static toggleClassName = (firstClassName, secondClassName, oldObj) => {
+function TodoApp() {
+  let maxId = 0
+  function createTask(label, min = 0, sec = 0, className = 'active') {
+    return {
+      label,
+      className,
+      createDate: Date.now(),
+      id: maxId++,
+      timerTime: {
+        minutes: min.length === 0 ? 0 : min,
+        seconds: sec.length === 0 ? 0 : sec,
+      },
+    }
+  }
+  const toggleClassName = (firstClassName, secondClassName, oldObj) => {
     if (oldObj.className === firstClassName) {
       return {
         ...oldObj,
@@ -20,37 +33,32 @@ export default class TodoApp extends Component {
       }
     }
   }
+  const [todoData, setTodoData] = useState([
+    createTask('Active'),
+    createTask('Completed', 12, 25, 'completed'),
+    createTask('Editing', 14, 12, 'editing'),
+  ])
+  const [filtersData, setFiltersData] = useState({
+    All: 'selected',
+    Active: '',
+    Completed: '',
+  })
 
-  maxId = 0
-
-  state = {
-    todoData: [
-      this.createTask('Active'),
-      this.createTask('Completed', 12, 25, 'completed'),
-      this.createTask('Editing', 14, 12, 'editing'),
-    ],
-    filtersData: {
-      All: 'selected',
-      Active: '',
-      Completed: '',
-    },
-  }
-
-  filteredFunctions = {
+  const filteredFunctions = {
     allFiltered: () => {
-      this.setState(({ todoData }) => ({
-        todoData: todoData.map((task) => {
+      setTodoData((td) =>
+        td.map((task) => {
           const newTask = { ...task }
           if (newTask.className.includes('hidden')) {
             newTask.className = newTask.className.slice(0, -7)
           }
           return newTask
-        }),
-      }))
+        })
+      )
     },
     activeFiltered: () => {
-      this.setState(({ todoData }) => ({
-        todoData: todoData.map((task) => {
+      setTodoData((td) =>
+        td.map((task) => {
           const newTask = { ...task }
           if (newTask.className.includes('completed') && !newTask.className.includes('hidden')) {
             newTask.className += ' hidden'
@@ -62,12 +70,12 @@ export default class TodoApp extends Component {
             newTask.className = newTask.className.slice(0, -7)
           }
           return newTask
-        }),
-      }))
+        })
+      )
     },
     completedFiltered: () => {
-      this.setState(({ todoData }) => ({
-        todoData: todoData.map((task) => {
+      setTodoData((td) =>
+        td.map((task) => {
           const newTask = { ...task }
           if (!newTask.className.includes('completed') && !newTask.className.includes('hidden')) {
             newTask.className += ' hidden'
@@ -76,34 +84,30 @@ export default class TodoApp extends Component {
             newTask.className = newTask.className.slice(0, -7)
           }
           return newTask
-        }),
-      }))
+        })
+      )
     },
     onFilterButton: (e) => {
-      this.setState(() => {
-        const entriesFiltersMap = new Map([
-          ['All', ''],
-          ['Active', ''],
-          ['Completed', ''],
-        ])
-        entriesFiltersMap.set(e.target.textContent, 'selected')
-        return {
-          filtersData: Object.fromEntries(entriesFiltersMap),
-        }
-      })
+      const entriesFiltersMap = new Map([
+        ['All', ''],
+        ['Active', ''],
+        ['Completed', ''],
+      ])
+      entriesFiltersMap.set(e.target.textContent, 'selected')
+      setFiltersData(Object.fromEntries(entriesFiltersMap))
     },
   }
 
-  deleteTask = (id) => {
-    this.setState(({ todoData }) => ({
-      todoData: todoData.toSpliced(
-        todoData.findIndex((el) => el.id === id),
+  const deleteTask = (id) => {
+    setTodoData((td) =>
+      td.toSpliced(
+        td.findIndex((el) => el.id === id),
         1
-      ),
-    }))
+      )
+    )
   }
 
-  submitTaskForm = (e) => {
+  const submitTaskForm = (e) => {
     e.preventDefault()
     const todoText = e.target[0].value
     if (todoText.length !== 0) {
@@ -125,7 +129,7 @@ export default class TodoApp extends Component {
         e.target[0].value = ''
         minInput.value = ''
         secInput.value = ''
-        this.setState(({ todoData }) => ({ todoData: [...todoData, this.createTask(todoText, min, sec)] }))
+        setTodoData((td) => [...td, createTask(todoText, min, sec)])
       }
       if (!isMinCorrect) {
         minInput.className += ' input-error'
@@ -136,93 +140,71 @@ export default class TodoApp extends Component {
     }
   }
 
-  onToggleCompleted = (id) => {
-    this.setState(({ todoData }) => {
-      const tasksIndex = todoData.findIndex((el) => el.id === id)
-      const oldTask = todoData[tasksIndex]
-      const { filtersData } = this.state
+  const onToggleCompleted = (id) => {
+    setTodoData((td) => {
+      const tasksIndex = td.findIndex((el) => el.id === id)
+      const oldTask = td[tasksIndex]
       let newTask
       if (filtersData.Completed === 'selected') {
-        newTask = TodoApp.toggleClassName('active hidden', 'completed', oldTask)
+        newTask = toggleClassName('active hidden', 'completed', oldTask)
       } else if (filtersData.Active === 'selected') {
-        newTask = TodoApp.toggleClassName('active', 'completed hidden', oldTask)
+        newTask = toggleClassName('active', 'completed hidden', oldTask)
       } else {
-        newTask = TodoApp.toggleClassName('active', 'completed', oldTask)
+        newTask = toggleClassName('active', 'completed', oldTask)
       }
-      return {
-        todoData: [...todoData.slice(0, tasksIndex), newTask, ...todoData.slice(tasksIndex + 1)],
-      }
+      return [...td.slice(0, tasksIndex), newTask, ...td.slice(tasksIndex + 1)]
     })
   }
 
-  editTask = (id) => {
-    this.setState(({ todoData }) => {
-      const tasksIndex = todoData.findIndex((el) => el.id === id)
-      const oldTask = todoData[tasksIndex]
+  const editTask = (id) => {
+    setTodoData((td) => {
+      const tasksIndex = td.findIndex((el) => el.id === id)
+      const oldTask = td[tasksIndex]
       if (oldTask.className === 'active') {
-        const newTask = TodoApp.toggleClassName(oldTask.className, 'editing', oldTask)
-        return {
-          todoData: [...todoData.slice(0, tasksIndex), newTask, ...todoData.slice(tasksIndex + 1)],
-        }
+        const newTask = toggleClassName(oldTask.className, 'editing', oldTask)
+        return [...td.slice(0, tasksIndex), newTask, ...td.slice(tasksIndex + 1)]
       }
     })
   }
 
-  onEdited = (id, text) => {
-    this.setState(({ todoData }) => {
-      const tasksIndex = todoData.findIndex((el) => el.id === id)
-      const oldTask = todoData[tasksIndex]
+  const onEdited = (id, text) => {
+    setTodoData((td) => {
+      const tasksIndex = td.findIndex((el) => el.id === id)
+      const oldTask = td[tasksIndex]
       const newTask = { ...oldTask, className: 'active', label: text }
-      return {
-        todoData: [...todoData.slice(0, tasksIndex), newTask, ...todoData.slice(tasksIndex + 1)],
-      }
+      return [...td.slice(0, tasksIndex), newTask, ...td.slice(tasksIndex + 1)]
     })
   }
 
-  clearCompleted = () => {
-    this.setState(({ todoData }) => ({
-      todoData: todoData.filter((task) => !task.className.includes('completed')),
-    }))
+  const clearCompleted = () => {
+    setTodoData((td) => td.filter((task) => !task.className.includes('completed')))
   }
 
-  createTask(label, min = 0, sec = 0, className = 'active') {
-    return {
-      label,
-      className,
-      createDate: Date.now(),
-      id: this.maxId++,
-      timerTime: {
-        minutes: min.length === 0 ? 0 : min,
-        seconds: sec.length === 0 ? 0 : sec,
-      },
-    }
-  }
+  const activeCount = todoData.filter((task) => !task.className.includes('completed')).length
 
-  render() {
-    const { todoData, filtersData } = this.state
-    const activeCount = todoData.filter((task) => !task.className.includes('completed')).length
-    return (
-      <section className="todoapp">
-        <header className="header">
-          <h1>todos</h1>
-          <NewTaskForm submitTaskForm={this.submitTaskForm} />
-        </header>
-        <section className="main">
-          <TaskList
-            tasks={todoData}
-            onDeleted={this.deleteTask}
-            editTask={this.editTask}
-            onEdited={this.onEdited}
-            onToggleCompleted={this.onToggleCompleted}
-          />
-        </section>
-        <Footer
-          activeCount={activeCount}
-          filters={filtersData}
-          filteredFunctions={this.filteredFunctions}
-          clearCompleted={this.clearCompleted}
+  return (
+    <section className="todoapp">
+      <header className="header">
+        <h1>todos</h1>
+        <NewTaskForm submitTaskForm={submitTaskForm} />
+      </header>
+      <section className="main">
+        <TaskList
+          tasks={todoData}
+          onDeleted={deleteTask}
+          editTask={editTask}
+          onEdited={onEdited}
+          onToggleCompleted={onToggleCompleted}
         />
       </section>
-    )
-  }
+      <Footer
+        activeCount={activeCount}
+        filters={filtersData}
+        filteredFunctions={filteredFunctions}
+        clearCompleted={clearCompleted}
+      />
+    </section>
+  )
 }
+
+export default TodoApp

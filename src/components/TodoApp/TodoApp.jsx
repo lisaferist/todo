@@ -5,14 +5,17 @@ import TaskList from '../TaskList'
 import Footer from '../Footer'
 import './TodoApp.css'
 
+let maxId = 0
 function TodoApp() {
-  let maxId = 0
-  function createTask(label, min = 0, sec = 0, className = 'active') {
+  function createTask(label, min = 0, sec = 0, className = 'active', id = maxId) {
+    if (id === maxId) {
+      maxId++
+    }
     return {
       label,
       className,
       createDate: Date.now(),
-      id: maxId++,
+      id,
       timerTime: {
         minutes: min.length === 0 ? 0 : min,
         seconds: sec.length === 0 ? 0 : sec,
@@ -34,9 +37,9 @@ function TodoApp() {
     }
   }
   const [todoData, setTodoData] = useState([
-    createTask('Active'),
-    createTask('Completed', 12, 25, 'completed'),
-    createTask('Editing', 14, 12, 'editing'),
+    createTask('Active', 0, 0, 'active', 0),
+    createTask('Completed', 12, 25, 'completed', 2),
+    createTask('Editing', 14, 12, 'editing', 3),
   ])
   const [filtersData, setFiltersData] = useState({
     All: 'selected',
